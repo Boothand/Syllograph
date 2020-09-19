@@ -91,10 +91,19 @@ function OnClickObject()
 
 	this.onclick = function (x, y)
 	{
-		this.objects.forEach(obj =>
+		// In reverse so it checks the objects
+		// that are drawn on top first:
+		for (var i = this.objects.length - 1; i >= 0; i--)
 		{
-			obj.onclick(x, y);
-		});
+			var obj = this.objects[i];
+
+			// True = handled event
+			// False = unhandled event
+			if (obj.onclick(x, y) == true)
+			{
+				break;
+			}
+		}
 	}
 
 	this.onrelease = function (x, y)

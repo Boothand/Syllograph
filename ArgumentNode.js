@@ -100,7 +100,11 @@ function ArgumentNode(x, y, onClickObj)
 		{
 			this.dragged = true;
 			this.fillStyle = 'rgba(220, 220, 220, 1)';
+
+			return true;
 		}
+
+		return false;
 	}
 
 	this.onrelease = function (x, y)
@@ -142,7 +146,6 @@ function ArgumentNode(x, y, onClickObj)
 		{
 			var xPos = this.getXPos() + this.innerPadding * 0.5;
 			var yPos = this.getYPos() + this.premises[0].lineHeight;
-			console.log("Before: " + yPos);
 
 			this.premises.forEach(premise =>
 			{
@@ -153,7 +156,6 @@ function ArgumentNode(x, y, onClickObj)
 				yPos += premise.getHeight();
 			});
 
-			console.log("After: " + yPos);
 		}
 
 		this.sizeY = totalHeightPremises + this.bottomPadding;

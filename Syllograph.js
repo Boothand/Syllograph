@@ -6,6 +6,7 @@ canvas.height = window.innerHeight;
 canvas.style.width = "100%";
 canvas.style.height = "100%";
 
+
 var ctx = canvas.getContext("2d");
 
 
@@ -85,36 +86,6 @@ window.addEventListener('resize',
 	});
 
 
-function OnClickObject()
-{
-	this.objects = [];
-
-	this.onclick = function (x, y)
-	{
-		// In reverse so it checks the objects
-		// that are drawn on top first:
-		for (var i = this.objects.length - 1; i >= 0; i--)
-		{
-			var obj = this.objects[i];
-
-			// True = handled event
-			// False = unhandled event
-			if (obj.onclick(x, y) == true)
-			{
-				break;
-			}
-		}
-	}
-
-	this.onrelease = function (x, y)
-	{
-		this.objects.forEach(obj =>
-		{
-			obj.onrelease(x, y);
-		});
-	}
-}
-
 var onSelectClicked = function (x, y)
 {
 	onClickObj.onclick(x, y);
@@ -135,9 +106,13 @@ var nodes = [];
 
 var nodeWidth = 0;
 
+
+
 for (var i = 0; i < 3; i++)
 {
-	var node = new ArgumentNode((nodeWidth + 100) * i, 300, onClickObj);
+	var nodeFillStyleObj = new FillStyle();
+	
+	var node = new ArgumentNode((nodeWidth + 100) * i, 300, onClickObj, nodeFillStyleObj);
 	nodeWidth = node.sizeX;
 
 	nodes.push(node);
@@ -154,6 +129,8 @@ var lastMouseX = 0;
 var lastMouseY = 0;
 
 var holdingPan = false;
+
+var topMenu = new SylloTopMenu(onClickObj);
 
 
 
@@ -181,6 +158,7 @@ function update()
 	lastMouseX = mouse.x;
 	lastMouseY = mouse.y;
 
+	onClickObj.onMouseMove(mouse.x, mouse.y, mouseDeltaX, mouseDeltaY);
 
 
 	// Grid:
@@ -207,7 +185,8 @@ function update()
 	});
 
 	
-
+	// Top menu:
+	topMenu.update();
 
 }
 

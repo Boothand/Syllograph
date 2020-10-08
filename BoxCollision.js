@@ -3,7 +3,7 @@ function BoxCollision(sizeX, sizeY)
 	this.sizeX = sizeX;
 	this.sizeY = sizeY;
 
-	this.validClick = function (x, y, originX, originY)
+	this.overlap = function (x, y, originX, originY)
 	{
 		var ourX = originX;//this.getXPos();
 		var ourY = originY;//this.getYPos();

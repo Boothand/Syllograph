@@ -1,66 +1,4 @@
-function Premise(text, width)
-{
-	this.width = width;
-	this.text = text;
-	this.lineHeight = 25;
-
-	this.newlines = 0;
-
-	this.getHeight = function ()
-	{
-		return this.lineHeight * this.newlines;
-	}
-
-
-	this.wrapText = function (context, text, x, y, maxWidth, lineHeight)
-	{
-		var words = text.split(' ');
-		var line = '';
-		this.newlines = 1;
-
-		for (var n = 0; n < words.length; n++)
-		{
-			var testLine = line + words[n] + ' ';
-			var metrics = context.measureText(testLine);
-			var testWidth = metrics.width;
-			
-			if (testWidth > maxWidth && n > 0)
-			{
-				context.fillText(line, x, y);
-				line = words[n] + ' ';
-				y += lineHeight;
-
-				this.newlines++;
-			}
-			else
-			{
-				line = testLine;
-			}
-		}
-
-		context.fillText(line, x, y);
-
-
-	}
-
-	this.update = function (x, y)
-	{
-		this.draw(x, y);
-	}
-
-	this.draw = function (x, y)
-	{
-		ctx.font = '16pt Calibri';
-		ctx.fillStyle = '#333';
-
-		this.wrapText(ctx, this.text, x, y, this.width, this.lineHeight);
-	}
-}
-
-
-
-
-function ArgumentNode(x, y, onClickObj)
+function ArgumentNode(x, y, onClickObj, fillStyleObj)
 {
 	this.x = x;
 	this.y = y;
@@ -73,12 +11,14 @@ function ArgumentNode(x, y, onClickObj)
 	this.clickedX = 0;
 	this.clickedY = 0;
 
-	this.fillStyle = 'rgba(200, 200, 200, 1)';
-	this.originalFillStyle = this.fillStyle;
+	// this.normalFillStyle = 'rgba(200, 200, 200, 1)';
+	// this.highlightedFillStyle = 'rgba(220, 220, 220, 1)';
+	// this.clickedFillStyle = 'rgba(230, 230, 230, 1)';
 
-	this.boxCollision = new BoxCollision(this.sizeX, this.sizeY);
+	// this.fillStyle = this.normalFillStyle;
+	this.fillStyleObj = fillStyleObj;
 
-	this.dragged = false;
+	this.collision = new BoxCollision(this.sizeX, this.sizeY);
 
 	this.innerPadding = 10;
 	this.bottomPadding = 60;
@@ -90,16 +30,15 @@ function ArgumentNode(x, y, onClickObj)
 	this.premises.push(new Premise("P3: This is a third test premise", this.sizeX - this.innerPadding));
 
 	// Register to onclick object:
-	onClickObj.objects.push(this);
+	onClickObj.addObject(this);
 
 
 
 	this.onclick = function (x, y)
 	{
-		if (this.boxCollision.validClick(x, y, this.getXPos(), this.getYPos()))
+		if (this.collision.overlap(x, y, this.getXPos(), this.getYPos()))
 		{
-			this.dragged = true;
-			this.fillStyle = 'rgba(220, 220, 220, 1)';
+			// this.fillStyle = this.clickedFillStyle;
 
 			return true;
 		}
@@ -109,10 +48,26 @@ function ArgumentNode(x, y, onClickObj)
 
 	this.onrelease = function (x, y)
 	{
-		this.dragged = false;
-		this.fillStyle = this.originalFillStyle;
+		if (this.collision.overlap(x, y, this.getXPos(), this.getYPos()))
+		{
+			// this.fillStyle = this.highlightedFillStyle;
+
+			return true;
+		}
+
+		return false;
 	}
 
+
+	this.onMouseEnter = function ()
+	{
+		// this.fillStyle = this.highlightedFillStyle;
+	}
+
+	this.onMouseExit = function ()
+	{
+		// this.fillStyle = this.normalFillStyle;
+	}
 
 
 	this.getXPos = function () { return this.x + this.xOffset; }
@@ -120,24 +75,22 @@ function ArgumentNode(x, y, onClickObj)
 
 	this.update = function (mouseDeltaX, mouseDeltaY)
 	{
-		if (this.dragged)
-		{
-			this.x += mouseDeltaX;
-			this.y += mouseDeltaY;
-		}
-		
 		this.draw(mouseDeltaX, mouseDeltaY);
 	}
 
 	this.draw = function (mouseDeltaX, mouseDeltaY)
 	{
-		ctx.fillStyle = this.fillStyle;
+		ctx.fillStyle = this.fillStyleObj.fillStyle;//this.fillStyle;
 
-		ctx.fillRect(
+		roundRect(
+			ctx,
 			this.x + this.xOffset,
 			this.y + this.yOffset,
 			this.sizeX,
-			this.sizeY);
+			this.sizeY,
+			10,
+			true,
+			true);
 		
 
 		var totalHeightPremises = 0;
@@ -145,7 +98,7 @@ function ArgumentNode(x, y, onClickObj)
 		if (this.premises.length > 0)
 		{
 			var xPos = this.getXPos() + this.innerPadding * 0.5;
-			var yPos = this.getYPos() + this.premises[0].lineHeight;
+			var yPos = this.getYPos();// + this.premises[0].lineHeight;
 
 			this.premises.forEach(premise =>
 			{
@@ -160,6 +113,6 @@ function ArgumentNode(x, y, onClickObj)
 
 		this.sizeY = totalHeightPremises + this.bottomPadding;
 
-		this.boxCollision.sizeY = this.sizeY;
+		this.collision.sizeY = this.sizeY;
 	};
 }
